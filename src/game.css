@@ -1,0 +1,23 @@
+.game-table{
+    border: 2px solid transparent;
+    border-collapse: collapse;
+}
+
+.game-square{
+    border: 2px solid black;
+    width: 20px;
+    height: 20px;
+}
+
+.not-clicked{
+    background-color: grey;
+}
+
+.mine{
+    background-color: aqua;
+}
+
+.flaged{
+    background-color: brown;
+}
+

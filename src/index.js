@@ -42,7 +42,7 @@ function App() {
      <div className="site">
       <Title text={titleText} loadTime={loadTime}/>
       <div className={display + " content"}>
-        <Game />
+        <Game rows={16} columns={16} mines={40}/>
       </div>
      </div>
     </React.StrictMode>

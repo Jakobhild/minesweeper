@@ -21,3 +21,13 @@
     background-color: brown;
 }
 
+.control-row{
+    display: flex;
+    flex-direction: row;
+}
+
+.control-row-item{
+    margin-left: 20px;
+    padding: 10px;
+}
+

@@ -2,10 +2,14 @@ import React from 'react';
 import { useState } from 'react';
 import './game.css'
 
-function Game(props) {
+export default function Game(props) {
     const boardRow = Array.from({length: 16}, (_, i) => i)
     const squares = Array.from({length: 16}, (_, i) => {return{row: i, column: boardRow}})
-    
+
+    const [ flags, setFlags ] = useState(0);
+
+    const [ instructionRow, setInstructionRow ] = useState("Press start to begin");
+
     const [ squareContent, setSquareContent ] = useState(Array.from({length: props.rows}, _ => new Array(props.columns).fill("")));
     const [ clickedSquares, setClickedSquares ] = useState(Array.from({length: props.rows}, _ => new Array(props.columns).fill(false)))
     const [ flagedSquares, setFlagedSquares ] = useState(Array.from({length: props.rows}, _ => new Array(props.columns).fill(false)))
@@ -16,6 +20,7 @@ function Game(props) {
     const newGame = () => {
         const mines = Array.from({length: props.mines}, () => {return {row: Math.floor(Math.random() * props.rows), column: Math.floor(Math.random() * props.columns)}});
         const state = Array.from({length: props.rows}, _ => new Array(props.columns).fill(""));
+        setFlags(0);
         for(let content of mines){
             state[content.row][content.column] = "X";
         }
@@ -49,21 +54,52 @@ function Game(props) {
         }
         setSquareContent(state);
         setClickedSquares(Array.from({length: props.rows}, _ => new Array(props.columns).fill(false)));
+        setFlagedSquares(Array.from({length: props.rows}, _ => new Array(props.columns).fill(false)));
         setInGame(true)
+        setInstructionRow("");
     }
 
     const clickSquare = (row, column) => {
         if(inGame){
             if(flagMode){
                 const state = {...flagedSquares};
-                state[row][column] = true;
-                setFlagedSquares(state);    
+                if(!state[row][column]){
+                    state[row][column] = true;
+                    setFlags(flags + 1)
+                }else{
+                    state[row][column] = false;
+                    setFlags(flags - 1);
+                }
+                setFlagedSquares(state);
             }else{
                 const state = {...clickedSquares};
                 state[row][column] = true;
                 checkEmpty();
+                checkForMine(row, column);
                 setClickedSquares(state);
-            }  
+                checkWin();
+            }
+        }
+    }
+
+    const checkForMine = (row, column) => {
+        if(squareContent[row][column]==="X"){
+            setInGame(false);
+            setInstructionRow("You lost!!!");
+        }
+    }
+
+    const checkWin = () => {
+        let counter = 0;
+        let not = 0
+        for(let row = 0; row < clickedSquares.length; row++){
+            for(let column = 0; column < clickedSquares[row].length; column++){
+                clickedSquares[row][column] ? counter++ : not++;
+            }
+        }
+        if(counter===(clickedSquares.length^2)){
+            setInGame(false)
+            setInstructionRow("You win")
         }
     }
 
@@ -143,10 +179,15 @@ function Game(props) {
         className += " game-square"
 
         return className;
-    }
+        }
 
     return(
         <div className="game">
+            <p>{instructionRow}</p>
+            <div className="control-row">
+                <p className="control-row-itam">{flags}</p>
+                {flagMode ? <button className="control-row-item" onClick={() => setFlagMode(false)}>No flag</button> : <button className="control-row-item" onClick={() => setFlagMode(true)}>Flag</button>}
+            </div>
             <table className="game-table">
                 <tbody>
                     {squares.map((squares) => {
@@ -161,9 +202,6 @@ function Game(props) {
                 </tbody>
             </table>
             <button onClick={newGame}>New Game</button>
-            {flagMode ? <button onClick={() => setFlagMode(false)}>No flag</button> : <button onClick={() => setFlagMode(true)}>Flag</button>}
         </div>
     );
 }
-
-export default Game;
